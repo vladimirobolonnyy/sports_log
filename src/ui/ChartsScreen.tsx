@@ -36,6 +36,7 @@ const EXERCISE_METRIC_META: Record<ExerciseMetric, { label: string; format: (n: 
   volume: { label: 'Объём', format: (n) => `${fmtNum(n)} кг` },
   reps: { label: 'Повторы', format: (n) => `${fmtNum(n)} повт.` },
   minutes: { label: 'Время', format: (n) => `${fmtNum(n)} мин` },
+  distance: { label: 'Дистанция', format: (n) => `${fmtNum(n)} км` },
 };
 
 // Chart settings survive switching tabs.
@@ -94,7 +95,7 @@ function ExerciseProgress({ catalog }: { catalog: ReturnType<typeof exerciseCata
     return (
       <section class="box">
         <h2>Прогресс упражнения</h2>
-        <p class="muted">Добавьте в тренировку упражнение с названием — здесь появится график веса, объёма, повторов или времени.</p>
+        <p class="muted">Добавьте в тренировку упражнение с названием — здесь появится график веса, объёма, повторов, времени или дистанции.</p>
       </section>
     );
   }
@@ -137,7 +138,7 @@ function ExerciseProgress({ catalog }: { catalog: ReturnType<typeof exerciseCata
           )}
         </>
       ) : (
-        <p class="muted">У этого упражнения пока нет ни веса, ни повторов, ни времени в подходах.</p>
+        <p class="muted">У этого упражнения пока нет ни веса, ни повторов, ни времени, ни дистанции в подходах.</p>
       )}
     </section>
   );

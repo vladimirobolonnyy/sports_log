@@ -5,11 +5,12 @@ import { DataError } from './errors';
 
 /**
  * The JSON document is both the export format and what the app keeps in browser storage:
- *   { "format": "sport-log", "version": 1, "exportedAt"?: ISO time, "workouts": Workout[] }
- * A future version must keep reading version 1 files.
+ *   { "format": "sport-log", "version": 2, "exportedAt"?: ISO time, "workouts": Workout[] }
+ * Every version reads all older ones; a newer file is refused with a clear message instead of losing its new fields.
+ * Version 2 added `distance` (km) to sets; in version 1 files it is simply absent.
  */
 export const FORMAT = 'sport-log';
-export const VERSION = 1;
+export const VERSION = 2;
 
 export function serializeProfile(workouts: readonly Workout[], options: { pretty?: boolean; exportedAt?: string } = {}): string {
   const doc = {
@@ -83,6 +84,7 @@ function readSet(raw: unknown, where: string): WorkoutSet {
     weight: readNumber(raw.weight, `${where}, вес`),
     reps: readNumber(raw.reps, `${where}, повторы`),
     minutes: readNumber(raw.minutes, `${where}, минуты`),
+    distance: readNumber(raw.distance, `${where}, км`),
   };
 }
 

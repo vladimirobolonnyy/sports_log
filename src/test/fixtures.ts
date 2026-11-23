@@ -3,11 +3,12 @@ import type { Exercise, Workout, WorkoutSet, WorkoutType } from '../model/types'
 let seq = 0;
 const id = (prefix: string) => `${prefix}-${++seq}`;
 
-export const set = (weight: number | null, reps: number | null, minutes: number | null = null): WorkoutSet => ({
+export const set = (weight: number | null, reps: number | null, minutes: number | null = null, distance: number | null = null): WorkoutSet => ({
   id: id('s'),
   weight,
   reps,
   minutes,
+  distance,
 });
 
 export const exercise = (name: string, sets: WorkoutSet[] = []): Exercise => ({ id: id('e'), name, sets });

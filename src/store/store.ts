@@ -28,7 +28,7 @@ const EMPTY_META: Meta = {
 };
 
 export type WorkoutPatch = Partial<Pick<Workout, 'date' | 'title' | 'type' | 'minutes'>>;
-export type SetPatch = Partial<Pick<WorkoutSet, 'weight' | 'reps' | 'minutes'>>;
+export type SetPatch = Partial<Pick<WorkoutSet, 'weight' | 'reps' | 'minutes' | 'distance'>>;
 export type ImportMode = 'replace' | 'merge';
 /** Puts a deleted item back where it was. */
 export type Undo = () => void;
@@ -173,7 +173,7 @@ export function createStore(storage: Storage, now: () => number = Date.now) {
 
     /** Adds an exercise with one empty set ready to be filled in; returns the exercise id. */
     addExercise(workoutId: string): string {
-      const exercise: Exercise = { id: newId(), name: '', sets: [{ id: newId(), weight: null, reps: null, minutes: null }] };
+      const exercise: Exercise = { id: newId(), name: '', sets: [{ id: newId(), weight: null, reps: null, minutes: null, distance: null }] };
       mapExercises(workoutId, (list) => [...list, exercise]);
       return exercise.id;
     },
@@ -209,7 +209,13 @@ export function createStore(storage: Storage, now: () => number = Date.now) {
     addSet(workoutId: string, exerciseId: string): void {
       mapExercise(workoutId, exerciseId, (e) => {
         const last = e.sets[e.sets.length - 1];
-        const set: WorkoutSet = { id: newId(), weight: last?.weight ?? null, reps: last?.reps ?? null, minutes: last?.minutes ?? null };
+        const set: WorkoutSet = {
+          id: newId(),
+          weight: last?.weight ?? null,
+          reps: last?.reps ?? null,
+          minutes: last?.minutes ?? null,
+          distance: last?.distance ?? null,
+        };
         return { ...e, sets: [...e.sets, set] };
       });
     },

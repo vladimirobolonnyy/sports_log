@@ -14,13 +14,15 @@ export const TYPE_META: Readonly<Record<WorkoutType, { label: string; icon: stri
   other: { label: 'Другое', icon: '🏅' },
 };
 
-/** One set. Every value is optional: a plank has only minutes, pull-ups only reps. */
+/** One set. Every value is optional: a plank has only minutes, pull-ups only reps, a warm-up minutes and km. */
 export interface WorkoutSet {
   readonly id: string;
   /** Kilograms. */
   readonly weight: number | null;
   readonly reps: number | null;
   readonly minutes: number | null;
+  /** Kilometres. */
+  readonly distance: number | null;
 }
 
 export interface Exercise {

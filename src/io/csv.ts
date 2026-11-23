@@ -9,7 +9,7 @@ import { DataError } from './errors';
  * Import finds columns by header name, so their order may change and extra columns are ignored.
  */
 
-type Column = 'date' | 'workout' | 'type' | 'workoutMinutes' | 'exercise' | 'set' | 'weight' | 'reps' | 'minutes' | 'id';
+type Column = 'date' | 'workout' | 'type' | 'workoutMinutes' | 'exercise' | 'set' | 'weight' | 'reps' | 'minutes' | 'distance' | 'id';
 
 const COLUMNS: readonly { key: Column; title: string; alias: string }[] = [
   { key: 'date', title: 'Дата', alias: 'date' },
@@ -21,6 +21,7 @@ const COLUMNS: readonly { key: Column; title: string; alias: string }[] = [
   { key: 'weight', title: 'Вес, кг', alias: 'weight_kg' },
   { key: 'reps', title: 'Повторы', alias: 'reps' },
   { key: 'minutes', title: 'Время, мин', alias: 'set_minutes' },
+  { key: 'distance', title: 'Дистанция, км', alias: 'distance_km' },
   { key: 'id', title: 'ID тренировки', alias: 'workout_id' },
 ];
 
@@ -44,6 +45,7 @@ export function workoutsToCsv(workouts: readonly Workout[]): string {
       weight: numberCell(set?.weight ?? null),
       reps: numberCell(set?.reps ?? null),
       minutes: numberCell(set?.minutes ?? null),
+      distance: numberCell(set?.distance ?? null),
       id: w.id,
     };
     lines.push(COLUMNS.map((c) => cell(values[c.key])).join(DELIMITER));
@@ -116,7 +118,8 @@ export function csvToWorkouts(text: string): Workout[] {
     const weight = parseNumber(get('weight'), line, 'Вес, кг');
     const reps = parseNumber(get('reps'), line, 'Повторы', true);
     const minutes = parseNumber(get('minutes'), line, 'Время, мин');
-    const hasSet = setNo != null || weight != null || reps != null || minutes != null;
+    const distance = parseNumber(get('distance'), line, 'Дистанция, км');
+    const hasSet = setNo != null || weight != null || reps != null || minutes != null || distance != null;
     if (!name && !hasSet) continue; // a workout-only row
 
     // The same exercise twice in a row is two exercises when its set numbers start over.
@@ -125,7 +128,7 @@ export function csvToWorkouts(text: string): Workout[] {
       exercise = { id: newId(), name, sets: [] };
       workout.exercises.push(exercise);
     }
-    if (hasSet) exercise.sets.push({ id: newId(), weight, reps, minutes });
+    if (hasSet) exercise.sets.push({ id: newId(), weight, reps, minutes, distance });
     lastSetNo = setNo;
   }
   return result;

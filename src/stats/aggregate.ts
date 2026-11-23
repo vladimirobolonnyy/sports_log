@@ -72,7 +72,7 @@ export function exerciseCatalog(workouts: readonly Workout[]): ExerciseEntry[] {
     .sort((a, b) => b.sessions - a.sessions || a.name.localeCompare(b.name, 'ru'));
 }
 
-export const EXERCISE_METRICS = ['maxWeight', 'volume', 'reps', 'minutes'] as const;
+export const EXERCISE_METRICS = ['maxWeight', 'volume', 'reps', 'minutes', 'distance'] as const;
 export type ExerciseMetric = (typeof EXERCISE_METRICS)[number];
 
 export interface ExercisePoint extends Record<ExerciseMetric, number> {
@@ -94,6 +94,7 @@ export function exerciseSeries(workouts: readonly Workout[], key: string): Exerc
       volume: sets.reduce((sum, s) => sum + setVolume(s), 0),
       reps: sets.reduce((sum, s) => sum + (s.reps ?? 0), 0),
       minutes: sets.reduce((sum, s) => sum + (s.minutes ?? 0), 0),
+      distance: sets.reduce((sum, s) => sum + (s.distance ?? 0), 0),
     });
   }
   return points.sort((a, b) => a.date.localeCompare(b.date));

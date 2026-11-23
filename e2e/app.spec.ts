@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { FORMAT, VERSION } from '../src/io/json';
 
 const today = () => {
   const d = new Date();
@@ -97,7 +98,7 @@ test('imports CSV, exports JSON with the same data, and undoes the import', asyn
     const file = await download;
     expect(file.suggestedFilename()).toBe(`trenirovki-${today()}.json`);
     const doc = JSON.parse(readFileSync((await file.path())!, 'utf8'));
-    expect(doc).toMatchObject({ format: 'sport-log', version: 1 });
+    expect(doc).toMatchObject({ format: FORMAT, version: VERSION });
     expect(doc.workouts.map((w: { id: string }) => w.id)).toEqual(['a1', 'a2']);
     expect(doc.workouts[0].exercises[0].sets.map((s: { weight: number }) => s.weight)).toEqual([50, 55]);
   }

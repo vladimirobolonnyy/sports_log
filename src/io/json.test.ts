@@ -5,7 +5,12 @@ import { FORMAT, VERSION, parseProfile, serializeProfile } from './json';
 
 describe('profile JSON', () => {
   const sample = [
-    workout('2026-11-20', { id: 'w1', title: 'Грудь', minutes: 45, exercises: [exercise('Жим', [set(60, 10), set(62.5, 8, 1)])] }),
+    workout('2026-11-20', {
+      id: 'w1',
+      title: 'Грудь',
+      minutes: 45,
+      exercises: [exercise('Разминка', [set(null, null, 9.5, 1.6)]), exercise('Жим', [set(60, 10), set(62.5, 8, 1)])],
+    }),
     workout('2026-11-21', { id: 'w2', type: 'yoga' }),
   ];
 
@@ -13,6 +18,15 @@ describe('profile JSON', () => {
     const text = serializeProfile(sample, { pretty: true, exportedAt: '2026-11-23T10:00:00.000Z' });
     expect(JSON.parse(text)).toMatchObject({ format: FORMAT, version: VERSION, exportedAt: '2026-11-23T10:00:00.000Z' });
     expect(parseProfile(text)).toEqual(sample);
+  });
+
+  it('reads version 1 files, which have no distance', () => {
+    const v1 = JSON.stringify({
+      format: FORMAT,
+      version: 1,
+      workouts: [{ id: 'w1', date: '2026-11-20', title: '', type: 'strength', minutes: null, exercises: [{ id: 'e1', name: 'Жим', sets: [{ id: 's1', weight: 60, reps: 10, minutes: null }] }] }],
+    });
+    expect(parseProfile(v1)[0]!.exercises[0]!.sets[0]).toEqual({ id: 's1', weight: 60, reps: 10, minutes: null, distance: null });
   });
 
   it('accepts a BOM and a bare array of workouts', () => {

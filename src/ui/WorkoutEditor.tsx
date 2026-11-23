@@ -118,7 +118,7 @@ export function WorkoutEditor({ id }: { id: string }) {
 
       <h3 class="section-title">Упражнения</h3>
       {workout.exercises.length === 0 && (
-        <p class="muted">Добавьте упражнение — внутри него записываются подходы: вес, повторы, время.</p>
+        <p class="muted">Добавьте упражнение — внутри него записываются подходы: вес, повторы, время, дистанция.</p>
       )}
       {workout.exercises.map((ex, i) => (
         <ExerciseCard
@@ -183,6 +183,7 @@ function ExerciseCard(props: {
             <span>Вес, кг</span>
             <span>Повторы</span>
             <span>Мин</span>
+            <span>Км</span>
             <span />
           </div>
           {exercise.sets.map((s, i) => (
@@ -191,6 +192,7 @@ function ExerciseCard(props: {
               <NumberInput value={s.weight} label={`Вес, кг, подход ${i + 1}`} onChange={(weight) => store.updateSet(wid, eid, s.id, { weight })} />
               <NumberInput value={s.reps} integer label={`Повторы, подход ${i + 1}`} onChange={(reps) => store.updateSet(wid, eid, s.id, { reps })} />
               <NumberInput value={s.minutes} label={`Минуты, подход ${i + 1}`} onChange={(minutes) => store.updateSet(wid, eid, s.id, { minutes })} />
+              <NumberInput value={s.distance} label={`Км, подход ${i + 1}`} onChange={(distance) => store.updateSet(wid, eid, s.id, { distance })} />
               <button type="button" class="icon-btn ghost" aria-label={`Удалить подход ${i + 1}`} onClick={() => removeSet(s.id, i + 1)}>
                 ✕
               </button>

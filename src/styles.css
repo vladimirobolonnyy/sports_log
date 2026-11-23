@@ -557,6 +557,7 @@ input[type='date'].input::-webkit-date-and-time-value {
 }
 
 .day {
+  container-type: inline-size;
   position: relative;
   display: grid;
   place-items: center;
@@ -603,7 +604,8 @@ input[type='date'].input::-webkit-date-and-time-value {
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 23px;
+  /* Sized from the day circle (a container), so the flame fills it on a phone and on a desktop alike. */
+  font-size: 80cqw;
   line-height: 1;
   pointer-events: none;
 }

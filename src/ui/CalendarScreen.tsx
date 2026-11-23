@@ -106,7 +106,11 @@ export function CalendarScreen() {
                   onClick={() => pick(iso)}
                 >
                   {parseIso(iso).getDate()}
-                  {list.length > 1 && <span class="more" />}
+                  {list.length > 0 && (
+                    <span class="fire" aria-hidden="true">
+                      🔥{list.length > 1 && <small>{list.length}</small>}
+                    </span>
+                  )}
                 </button>
               );
             });

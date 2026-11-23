@@ -1,5 +1,5 @@
 import { EXERCISES, SETS, fmtCount, fmtNum } from '../lib/format';
-import { TYPE_META, type Exercise, type Workout, type WorkoutSet } from './types';
+import type { Exercise, Workout, WorkoutSet } from './types';
 
 const sum = (xs: readonly number[]): number => xs.reduce((a, b) => a + b, 0);
 
@@ -14,7 +14,7 @@ export const workoutDistance = (w: Workout): number => sum(w.exercises.flatMap((
 /** Minutes the workout counts for in statistics: its own duration if set, otherwise the time of its sets. */
 export const workoutMinutes = (w: Workout): number => Math.round(w.minutes ?? setsMinutes(w));
 
-export const workoutTitle = (w: Workout): string => w.title.trim() || TYPE_META[w.type].label;
+export const workoutTitle = (w: Workout): string => w.title.trim() || 'Тренировка';
 
 /** Key that treats «Жим лёжа», «жим  лежа» and «Жим лежа » as the same exercise. */
 export const exerciseKey = (name: string): string => name.trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ');

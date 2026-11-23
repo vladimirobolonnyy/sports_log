@@ -81,7 +81,7 @@ describe('store', () => {
     const store = open();
     const untouched = store.createWorkout('2026-11-23');
     const typed = store.createWorkout('2026-11-23');
-    store.updateWorkout(typed.id, { type: 'yoga' });
+    store.updateWorkout(typed.id, { title: 'Йога' });
     expect(store.discardIfUntouched(untouched.id)).toBe(true);
     expect(store.discardIfUntouched(typed.id)).toBe(false);
     expect(store.workouts.value.map((w) => w.id)).toEqual([typed.id]);

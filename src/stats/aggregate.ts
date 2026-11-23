@@ -1,47 +1,5 @@
-import { addDaysIso, mondayIso } from '../lib/dates';
-import { exerciseKey, setVolume, workoutMinutes, workoutVolume } from '../model/derive';
-import { WORKOUT_TYPES, type Workout, type WorkoutType } from '../model/types';
-
-export interface WeekBucket {
-  /** Monday, ISO. */
-  readonly start: string;
-  readonly count: number;
-  readonly minutes: number;
-  /** Tonnage, kg. */
-  readonly volume: number;
-}
-
-/** The last `weeks` calendar weeks, oldest first, the current week included. */
-export function weeklyBuckets(workouts: readonly Workout[], weeks: number, today: string): WeekBucket[] {
-  const first = addDaysIso(mondayIso(today), -7 * (weeks - 1));
-  const buckets = Array.from({ length: weeks }, (_, i) => ({ start: addDaysIso(first, 7 * i), count: 0, minutes: 0, volume: 0 }));
-  const index = new Map(buckets.map((b, i) => [b.start, i]));
-  for (const w of workouts) {
-    const i = index.get(mondayIso(w.date));
-    if (i === undefined) continue;
-    const b = buckets[i]!;
-    b.count++;
-    b.minutes += workoutMinutes(w);
-    b.volume += workoutVolume(w);
-  }
-  return buckets;
-}
-
-export interface TypeShare {
-  readonly type: WorkoutType;
-  readonly count: number;
-  readonly minutes: number;
-}
-
-/** Workouts per type within [from, to], most frequent first. */
-export function typeBreakdown(workouts: readonly Workout[], from: string, to: string): TypeShare[] {
-  return WORKOUT_TYPES.map((type) => {
-    const list = workouts.filter((w) => w.type === type && w.date >= from && w.date <= to);
-    return { type, count: list.length, minutes: list.reduce((s, w) => s + workoutMinutes(w), 0) };
-  })
-    .filter((t) => t.count > 0)
-    .sort((a, b) => b.count - a.count);
-}
+import { exerciseKey } from '../model/derive';
+import type { Workout } from '../model/types';
 
 export interface ExerciseEntry {
   readonly key: string;
@@ -68,11 +26,13 @@ export function exerciseCatalog(workouts: readonly Workout[]): ExerciseEntry[] {
       }
     }
   }
-  return [...map].map(([key, e]) => ({ key, name: e.name, sessions: e.sessions }))
+  return [...map]
+    .map(([key, e]) => ({ key, name: e.name, sessions: e.sessions }))
     .sort((a, b) => b.sessions - a.sessions || a.name.localeCompare(b.name, 'ru'));
 }
 
-export const EXERCISE_METRICS = ['maxWeight', 'volume', 'reps', 'minutes', 'distance'] as const;
+/** What a chart of an exercise shows: weight is the heaviest set of the workout, the rest are totals of the workout. */
+export const EXERCISE_METRICS = ['weight', 'reps', 'minutes', 'distance'] as const;
 export type ExerciseMetric = (typeof EXERCISE_METRICS)[number];
 
 export interface ExercisePoint extends Record<ExerciseMetric, number> {
@@ -90,8 +50,7 @@ export function exerciseSeries(workouts: readonly Workout[], key: string): Exerc
     points.push({
       date: w.date,
       workoutId: w.id,
-      maxWeight: Math.max(0, ...sets.map((s) => s.weight ?? 0)),
-      volume: sets.reduce((sum, s) => sum + setVolume(s), 0),
+      weight: Math.max(0, ...sets.map((s) => s.weight ?? 0)),
       reps: sets.reduce((sum, s) => sum + (s.reps ?? 0), 0),
       minutes: sets.reduce((sum, s) => sum + (s.minutes ?? 0), 0),
       distance: sets.reduce((sum, s) => sum + (s.distance ?? 0), 0),

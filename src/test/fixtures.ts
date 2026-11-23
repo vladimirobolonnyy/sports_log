@@ -1,4 +1,4 @@
-import type { Exercise, Workout, WorkoutSet, WorkoutType } from '../model/types';
+import type { Exercise, Workout, WorkoutSet } from '../model/types';
 
 let seq = 0;
 const id = (prefix: string) => `${prefix}-${++seq}`;
@@ -15,12 +15,11 @@ export const exercise = (name: string, sets: WorkoutSet[] = []): Exercise => ({ 
 
 export const workout = (
   date: string,
-  options: { title?: string; type?: WorkoutType; minutes?: number | null; exercises?: Exercise[]; id?: string } = {},
+  options: { title?: string; minutes?: number | null; exercises?: Exercise[]; id?: string } = {},
 ): Workout => ({
   id: options.id ?? id('w'),
   date,
   title: options.title ?? '',
-  type: options.type ?? 'strength',
   minutes: options.minutes ?? null,
   exercises: options.exercises ?? [],
 });

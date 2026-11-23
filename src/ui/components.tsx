@@ -1,32 +1,30 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { fmtDayLong } from '../lib/dates';
+import { DOW, parseIso } from '../lib/dates';
 import { sanitizeNumber, toInputText } from '../lib/format';
 import { exerciseKey, workoutSummary, workoutTitle } from '../model/derive';
-import { TYPE_META, type Workout, type WorkoutType } from '../model/types';
+import type { Workout } from '../model/types';
 import { openWorkout } from '../router';
 
-export const typeColor = (t: WorkoutType): string => `--c:var(--t-${t})`;
-
-export function TypeIcon({ type, small = false }: { type: WorkoutType; small?: boolean }) {
+/** Day of the month over the weekday: «20 / пт». */
+function DateBadge({ iso }: { iso: string }) {
+  const d = parseIso(iso);
   return (
-    <span class={small ? 'ico small' : 'ico'} style={typeColor(type)} aria-hidden="true">
-      {TYPE_META[type].icon}
+    <span class="date-badge" aria-hidden="true">
+      <b>{d.getDate()}</b>
+      <small>{DOW[(d.getDay() + 6) % 7]}</small>
     </span>
   );
 }
 
 /** A workout in a list; opens the editor. */
-export function WorkoutRow({ workout, withDate = false }: { workout: Workout; withDate?: boolean }) {
+export function WorkoutRow({ workout }: { workout: Workout }) {
   return (
     <button type="button" class="entry" onClick={() => openWorkout(workout.id)}>
-      <TypeIcon type={workout.type} />
+      <DateBadge iso={workout.date} />
       <span class="info">
         <span class="t">{workoutTitle(workout)}</span>
-        <span class="m">
-          {withDate ? `${fmtDayLong(workout.date)} · ` : ''}
-          {workoutSummary(workout)}
-        </span>
+        <span class="m">{workoutSummary(workout)}</span>
       </span>
       <span class="chev" aria-hidden="true">›</span>
     </button>

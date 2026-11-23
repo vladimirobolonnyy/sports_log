@@ -1,6 +1,6 @@
 import { isValidIso } from '../lib/dates';
 import { newId } from '../model/ids';
-import { isWorkoutType, type Exercise, type Workout, type WorkoutSet } from '../model/types';
+import type { Exercise, Workout, WorkoutSet } from '../model/types';
 import { DataError } from './errors';
 
 /**
@@ -8,6 +8,7 @@ import { DataError } from './errors';
  *   { "format": "sport-log", "version": 2, "exportedAt"?: ISO time, "workouts": Workout[] }
  * Every version reads all older ones; a newer file is refused with a clear message instead of losing its new fields.
  * Version 2 added `distance` (km) to sets; in version 1 files it is simply absent.
+ * Workouts used to have a `type` (strength, cardio…); it was dropped and is ignored when present.
  */
 export const FORMAT = 'sport-log';
 export const VERSION = 2;
@@ -60,7 +61,6 @@ function readWorkout(raw: unknown, where: string): Workout {
     id: readId(raw.id),
     date: raw.date,
     title: readText(raw.title, `${where}, название`),
-    type: isWorkoutType(raw.type) ? raw.type : 'other',
     minutes: readNumber(raw.minutes, `${where}, длительность`),
     exercises: exercises.map((e, i) => readExercise(e, `${where}, упражнение №${i + 1}`)),
   };

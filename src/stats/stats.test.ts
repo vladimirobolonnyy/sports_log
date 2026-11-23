@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { exerciseKey, workoutMinutes, workoutSummary, workoutVolume } from '../model/derive';
 import { exercise, set, workout } from '../test/fixtures';
-import { exerciseCatalog, exerciseSeries, typeBreakdown, weeklyBuckets } from './aggregate';
+import { exerciseCatalog, exerciseSeries } from './aggregate';
 import { niceDomain, ticksOf } from './scale';
 import { streakInfo } from './streak';
 
@@ -47,39 +47,6 @@ describe('derived values', () => {
   });
 });
 
-describe('weeklyBuckets', () => {
-  it('returns the last N weeks, oldest first, the current one included', () => {
-    const list = [
-      workout('2026-11-24', { minutes: 30, exercises: [exercise('Жим', [set(50, 10)])] }),
-      workout('2026-11-23', { minutes: 20 }),
-      workout('2026-11-11', { minutes: 40 }),
-      workout('2026-01-01', { minutes: 99 }), // outside the range
-    ];
-    const b = weeklyBuckets(list, 3, TODAY);
-    expect(b.map((x) => x.start)).toEqual(['2026-11-09', '2026-11-16', '2026-11-23']);
-    expect(b.map((x) => [x.count, x.minutes, x.volume])).toEqual([
-      [1, 40, 0],
-      [0, 0, 0],
-      [2, 50, 500],
-    ]);
-  });
-});
-
-describe('typeBreakdown', () => {
-  it('counts workouts per type within the period, most frequent first', () => {
-    const list = [
-      workout('2026-11-20', { type: 'yoga', minutes: 30 }),
-      workout('2026-11-21', { type: 'strength', minutes: 60 }),
-      workout('2026-11-22', { type: 'strength', minutes: 45 }),
-      workout('2026-10-01', { type: 'cardio', minutes: 20 }),
-    ];
-    expect(typeBreakdown(list, '2026-11-01', '2026-11-30')).toEqual([
-      { type: 'strength', count: 2, minutes: 105 },
-      { type: 'yoga', count: 1, minutes: 30 },
-    ]);
-  });
-});
-
 describe('exercise progress', () => {
   const list = [
     workout('2026-11-10', { exercises: [exercise('Жим лёжа', [set(60, 10), set(65, 8)])] }),
@@ -95,11 +62,19 @@ describe('exercise progress', () => {
     ]);
   });
 
-  it('makes one point per workout, oldest first, combining repeated entries', () => {
-    expect(exerciseSeries(list, 'жим лежа').map((p) => [p.date, p.maxWeight, p.volume, p.reps])).toEqual([
-      ['2026-11-03', 55, 550, 10],
-      ['2026-11-10', 65, 1120, 18],
-      ['2026-11-17', 70, 1150, 25],
+  it('makes one point per workout, oldest first: heaviest set, total reps, minutes and km', () => {
+    expect(exerciseSeries(list, 'жим лежа').map((p) => [p.date, p.weight, p.reps, p.minutes, p.distance])).toEqual([
+      ['2026-11-03', 55, 10, 0, 0],
+      ['2026-11-10', 65, 18, 0, 0],
+      ['2026-11-17', 70, 25, 0, 0],
+    ]);
+    const warmUps = [
+      workout('2026-11-03', { exercises: [exercise('Разминка', [set(null, null, 9, 1.5)])] }),
+      workout('2026-11-12', { exercises: [exercise('Разминка', [set(null, null, 8, 1.5), set(null, null, 2, 0.3)])] }),
+    ];
+    expect(exerciseSeries(warmUps, 'разминка').map((p) => [p.minutes, p.distance])).toEqual([
+      [9, 1.5],
+      [10, 1.8],
     ]);
   });
 });

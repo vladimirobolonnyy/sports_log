@@ -48,9 +48,15 @@ test('records a workout with sets; it shows up in the calendar, journal and char
   await expect(page.locator('.entry', { hasText: 'Грудь' })).toContainText('1 упражнение · 3 подхода');
 
   await tab(page, 'Графики').click();
-  await expect(page.locator('.bar.sel')).toHaveCount(1);
-  await expect(page.getByLabel('Упражнение', { exact: true })).toHaveValue('жим лежа');
-  await expect(page.locator('circle.pt')).toHaveCount(1);
+  const chart = page.getByRole('region', { name: 'Жим лёжа' });
+  await expect(chart).toContainText('1 тренировка');
+  await expect(chart.locator('circle.pt')).toHaveCount(1);
+  await expect(chart).toContainText('62,5 кг'); // «Вес»: the heaviest set
+  await page.getByRole('button', { name: 'Повторы' }).click();
+  await expect(chart).toContainText('28 повт.'); // 10 + 10 + 8
+  await page.getByRole('button', { name: 'Км' }).click();
+  await expect(chart).toHaveCount(0);
+  await expect(page.getByText('Без данных «Км»: Жим лёжа.')).toBeVisible();
 });
 
 test('edits and deletes with undo', async ({ page }) => {

@@ -13,11 +13,11 @@ import {
 } from '../lib/dates';
 import { WEEKS, WORKOUTS, fmtCount } from '../lib/format';
 import { workoutMinutes, workoutTitle } from '../model/derive';
-import { TYPE_META, type Workout } from '../model/types';
+import type { Workout } from '../model/types';
 import { streakInfo } from '../stats/streak';
 import { store } from '../store';
 import { recordWorkout } from './actions';
-import { Kpi, WorkoutRow, typeColor } from './components';
+import { Kpi, WorkoutRow } from './components';
 
 // Kept outside the component: the shown month and the picked day survive switching tabs.
 const shownMonth = signal(monthStartIso(todayIso()));
@@ -93,21 +93,19 @@ export function CalendarScreen() {
             const days = Array.from({ length: 7 }, (_, k) => {
               const iso = addDaysIso(monday, k);
               const list = byDay.get(iso) ?? [];
-              const first = list[0];
-              const classes = ['day', !iso.startsWith(prefix) && 'out', first && 'has', iso === today && 'today', iso === day && 'sel'];
+              const classes = ['day', !iso.startsWith(prefix) && 'out', list.length > 0 && 'has', iso === today && 'today', iso === day && 'sel'];
               const label = fmtDayLong(iso) + (list.length ? `: ${list.map(workoutTitle).join('; ')}` : '');
               return (
                 <button
                   type="button"
                   key={iso}
                   class={classes.filter(Boolean).join(' ')}
-                  style={first ? typeColor(first.type) : undefined}
                   title={label}
                   aria-label={label}
                   aria-pressed={iso === day}
                   onClick={() => pick(iso)}
                 >
-                  {first ? TYPE_META[first.type].icon : parseIso(iso).getDate()}
+                  {parseIso(iso).getDate()}
                   {list.length > 1 && <span class="more" />}
                 </button>
               );
@@ -134,32 +132,9 @@ export function CalendarScreen() {
           })}
         </div>
 
-        <TypeSummary workouts={inMonth} />
       </section>
 
       <DayPanel day={day} today={today} workouts={byDay.get(day) ?? []} />
-    </div>
-  );
-}
-
-function TypeSummary({ workouts }: { workouts: readonly Workout[] }) {
-  const byType = new Map<Workout['type'], { n: number; min: number }>();
-  for (const w of workouts) {
-    const s = byType.get(w.type) ?? { n: 0, min: 0 };
-    s.n++;
-    s.min += workoutMinutes(w);
-    byType.set(w.type, s);
-  }
-  if (!byType.size) return null;
-  return (
-    <div class="type-sum">
-      {[...byType]
-        .sort((a, b) => b[1].n - a[1].n)
-        .map(([type, s]) => (
-          <span class="badge" key={type} style={typeColor(type)}>
-            {TYPE_META[type].icon} {TYPE_META[type].label} · {s.n} · {s.min} мин
-          </span>
-        ))}
     </div>
   );
 }

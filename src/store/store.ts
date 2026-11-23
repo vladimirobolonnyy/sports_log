@@ -27,7 +27,7 @@ const EMPTY_META: Meta = {
   installHintDismissed: false,
 };
 
-export type WorkoutPatch = Partial<Pick<Workout, 'date' | 'title' | 'type' | 'minutes'>>;
+export type WorkoutPatch = Partial<Pick<Workout, 'date' | 'title' | 'minutes'>>;
 export type SetPatch = Partial<Pick<WorkoutSet, 'weight' | 'reps' | 'minutes' | 'distance'>>;
 export type ImportMode = 'replace' | 'merge';
 /** Puts a deleted item back where it was. */
@@ -136,7 +136,7 @@ export function createStore(storage: Storage, now: () => number = Date.now) {
 
     /** A new empty workout («создаётся пустая запись»), filled in by the editor. */
     createWorkout(date: string): Workout {
-      const w: Workout = { id: newId(), date, title: '', type: 'strength', minutes: null, exercises: [] };
+      const w: Workout = { id: newId(), date, title: '', minutes: null, exercises: [] };
       fresh.set(w.id, date);
       commit([...workouts.value, w]);
       return w;
@@ -159,14 +159,14 @@ export function createStore(storage: Storage, now: () => number = Date.now) {
 
     /**
      * Drops a workout created in this session and left exactly as created, so an accidental tap on
-     * «Тренировка» leaves no empty day in the calendar and the streak. Returns whether it was dropped.
+     * «+ Тренировка» leaves no empty day in the calendar and the streak. Returns whether it was dropped.
      */
     discardIfUntouched(id: string): boolean {
       const createdFor = fresh.get(id);
       fresh.delete(id);
       const w = find(id);
       const untouched =
-        w && w.date === createdFor && w.title === '' && w.type === 'strength' && w.minutes === null && w.exercises.length === 0;
+        w && w.date === createdFor && w.title === '' && w.minutes === null && w.exercises.length === 0;
       if (untouched) commit(workouts.value.filter((x) => x.id !== id));
       return Boolean(untouched);
     },

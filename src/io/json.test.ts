@@ -11,7 +11,7 @@ describe('profile JSON', () => {
       minutes: 45,
       exercises: [exercise('Разминка', [set(null, null, 9.5, 1.6)]), exercise('Жим', [set(60, 10), set(62.5, 8, 1)])],
     }),
-    workout('2026-11-21', { id: 'w2', type: 'yoga' }),
+    workout('2026-11-21', { id: 'w2', minutes: 30 }),
   ];
 
   it('round-trips without losing anything', () => {
@@ -26,7 +26,9 @@ describe('profile JSON', () => {
       version: 1,
       workouts: [{ id: 'w1', date: '2026-11-20', title: '', type: 'strength', minutes: null, exercises: [{ id: 'e1', name: 'Жим', sets: [{ id: 's1', weight: 60, reps: 10, minutes: null }] }] }],
     });
-    expect(parseProfile(v1)[0]!.exercises[0]!.sets[0]).toEqual({ id: 's1', weight: 60, reps: 10, minutes: null, distance: null });
+    const [w] = parseProfile(v1);
+    expect(w!.exercises[0]!.sets[0]).toEqual({ id: 's1', weight: 60, reps: 10, minutes: null, distance: null });
+    expect(w).not.toHaveProperty('type'); // workout types were dropped later
   });
 
   it('accepts a BOM and a bare array of workouts', () => {
@@ -36,7 +38,7 @@ describe('profile JSON', () => {
 
   it('fills in what a hand-written file may omit', () => {
     const [w] = parseProfile(JSON.stringify({ workouts: [{ date: '2026-11-20', exercises: [{ name: 'Бег', sets: [{ minutes: 20 }] }] }] }));
-    expect(w).toMatchObject({ date: '2026-11-20', title: '', type: 'other', minutes: null });
+    expect(w).toMatchObject({ date: '2026-11-20', title: '', minutes: null });
     expect(w!.id).toMatch(/\S/);
     expect(w!.exercises[0]!.sets[0]).toMatchObject({ weight: null, reps: null, minutes: 20 });
   });

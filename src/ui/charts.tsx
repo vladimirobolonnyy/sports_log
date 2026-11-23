@@ -3,7 +3,7 @@ import { daysBetween, fmtDateShort, fmtDayMonth } from '../lib/dates';
 import { fmtAxis } from '../lib/format';
 import { niceDomain, ticksOf } from '../stats/scale';
 
-// Hand-drawn SVG charts: no chart library to update or break over the years. Tap a bar or a point to read its value.
+// Hand-drawn SVG chart: no chart library to update or break over the years. Tap a point to read its value.
 
 const PAD = { left: 44, right: 10, top: 10, bottom: 24 } as const;
 
@@ -22,77 +22,6 @@ function useWidth() {
     return () => observer.disconnect();
   }, []);
   return [ref, width] as const;
-}
-
-export interface Bar {
-  readonly label: string;
-  /** Caption shown for the selected bar, e.g. the week's dates. */
-  readonly title: string;
-  readonly value: number;
-}
-
-export function BarChart(props: { data: readonly Bar[]; format: (n: number) => string; integer?: boolean; height?: number }) {
-  const { data, format, integer = false, height = 200 } = props;
-  const [ref, width] = useWidth();
-  const [picked, setPicked] = useState<number | null>(null);
-  const sel = picked !== null && picked < data.length ? picked : data.length - 1;
-  const current = data[sel];
-
-  const domain = niceDomain(0, Math.max(0, ...data.map((d) => d.value)), 4, integer);
-  const innerW = Math.max(0, width - PAD.left - PAD.right);
-  const innerH = height - PAD.top - PAD.bottom;
-  const slot = data.length ? innerW / data.length : 0;
-  const barW = Math.max(2, Math.min(32, slot * 0.62));
-  const y = (v: number) => PAD.top + innerH - (v / domain.hi) * innerH;
-  // Label every n-th bar so labels never overlap; the last (current) bar always gets one.
-  const every = Math.max(1, Math.ceil(44 / Math.max(slot, 1)));
-
-  return (
-    <div class="chart" ref={ref}>
-      <div class="chart-cap">
-        {current && (
-          <>
-            <b>{format(current.value)}</b> <span class="muted">{current.title}</span>
-          </>
-        )}
-      </div>
-      {width > 0 && (
-        <svg width={width} height={height} role="img" aria-label={current ? `${current.title}: ${format(current.value)}` : ''}>
-          {ticksOf(domain).map((t) => (
-            <g key={t}>
-              <line class="grid-line" x1={PAD.left} x2={width - PAD.right} y1={y(t)} y2={y(t)} />
-              <text class="axis-y" x={PAD.left - 6} y={y(t) + 4}>
-                {fmtAxis(t)}
-              </text>
-            </g>
-          ))}
-          {data.map((d, i) => {
-            const x = PAD.left + i * slot;
-            return (
-              <g key={i} class="bar-slot" onClick={() => setPicked(i)}>
-                <rect class="hit" x={x} y={PAD.top} width={slot} height={innerH + PAD.bottom} />
-                {d.value > 0 && (
-                  <rect
-                    class={i === sel ? 'bar sel' : 'bar'}
-                    x={x + (slot - barW) / 2}
-                    y={y(d.value)}
-                    width={barW}
-                    height={Math.max(1, PAD.top + innerH - y(d.value))}
-                    rx={Math.min(4, barW / 2)}
-                  />
-                )}
-                {(data.length - 1 - i) % every === 0 && (
-                  <text class="axis-x" x={x + slot / 2} y={height - 6}>
-                    {d.label}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-        </svg>
-      )}
-    </div>
-  );
 }
 
 export interface Point {

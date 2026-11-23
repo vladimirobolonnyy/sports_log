@@ -1,20 +1,20 @@
 import { isValidIso } from '../lib/dates';
 import { newId } from '../model/ids';
-import { TYPE_META, WORKOUT_TYPES, isWorkoutType, type Workout, type WorkoutSet, type WorkoutType } from '../model/types';
+import type { Workout, WorkoutSet } from '../model/types';
 import { DataError } from './errors';
 
 /*
  * CSV for Excel/Numbers: one row per set, «;» as the delimiter, decimal comma, UTF-8 with BOM.
  * A workout without exercises and an exercise without sets get one row each with the empty columns.
- * Import finds columns by header name, so their order may change and extra columns are ignored.
+ * Import finds columns by header name, so their order may change and extra columns are ignored
+ * (including «Тип» from files of the earlier version, which had workout types).
  */
 
-type Column = 'date' | 'workout' | 'type' | 'workoutMinutes' | 'exercise' | 'set' | 'weight' | 'reps' | 'minutes' | 'distance' | 'id';
+type Column = 'date' | 'workout' | 'workoutMinutes' | 'exercise' | 'set' | 'weight' | 'reps' | 'minutes' | 'distance' | 'id';
 
 const COLUMNS: readonly { key: Column; title: string; alias: string }[] = [
   { key: 'date', title: 'Дата', alias: 'date' },
   { key: 'workout', title: 'Тренировка', alias: 'workout' },
-  { key: 'type', title: 'Тип', alias: 'type' },
   { key: 'workoutMinutes', title: 'Длительность, мин', alias: 'workout_minutes' },
   { key: 'exercise', title: 'Упражнение', alias: 'exercise' },
   { key: 'set', title: 'Подход', alias: 'set' },
@@ -38,7 +38,6 @@ export function workoutsToCsv(workouts: readonly Workout[]): string {
     const values: Record<Column, string> = {
       date: w.date,
       workout: w.title,
-      type: w.type,
       workoutMinutes: numberCell(w.minutes),
       exercise,
       set: setNo,
@@ -94,17 +93,16 @@ export function csvToWorkouts(text: string): Workout[] {
 
     const date = parseDate(get('date'), line);
     const title = get('workout');
-    const type = parseType(get('type'));
     const workoutMinutes = parseNumber(get('workoutMinutes'), line, 'Длительность, мин');
     const id = get('id');
-    // Rows of one workout share its id; rows written by hand without ids are grouped while date/title/type repeat.
-    const key = id ? `id:${id}` : `row:${date}|${title}|${type}|${workoutMinutes}`;
+    // Rows of one workout share its id; rows written by hand without ids are grouped while date and title repeat.
+    const key = id ? `id:${id}` : `row:${date}|${title}|${workoutMinutes}`;
     if (!workout || key !== workoutKey) {
       const known = id ? byId.get(id) : undefined;
       if (known) {
         workout = known;
       } else {
-        workout = { id: id || newId(), date, title, type, minutes: workoutMinutes, exercises: [] };
+        workout = { id: id || newId(), date, title, minutes: workoutMinutes, exercises: [] };
         result.push(workout);
         if (id) byId.set(id, workout);
       }
@@ -147,13 +145,6 @@ function parseDate(raw: string, line: number): string {
     throw new DataError(`Строка ${line}: неверная дата «${raw}». Нужен формат ГГГГ-ММ-ДД или ДД.ММ.ГГГГ.`);
   }
   return iso;
-}
-
-function parseType(raw: string): WorkoutType {
-  const s = raw.toLowerCase();
-  if (!s) return 'strength';
-  if (isWorkoutType(s)) return s;
-  return WORKOUT_TYPES.find((t) => TYPE_META[t].label.toLowerCase() === s) ?? 'other';
 }
 
 function parseNumber(raw: string, line: number, column: string, integer = false): number | null {

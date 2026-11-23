@@ -59,7 +59,7 @@ export function JournalScreen() {
             {fmtMonthTitle(`${m.key}-01`)} <span class="muted">· {fmtCount(m.items.length, WORKOUTS)}</span>
           </h3>
           {m.items.map((w) => (
-            <WorkoutRow key={w.id} workout={w} withDate />
+            <WorkoutRow key={w.id} workout={w} />
           ))}
         </section>
       ))}

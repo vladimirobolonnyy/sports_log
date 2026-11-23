@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { fmtDayLong, isValidIso } from '../lib/dates';
 import { fmtNum } from '../lib/format';
 import { exerciseSummary, setsMinutes, workoutSummary } from '../model/derive';
-import { TYPE_META, WORKOUT_TYPES, isWorkoutType, type Exercise, type Workout } from '../model/types';
+import type { Exercise, Workout } from '../model/types';
 import { closeWorkout } from '../router';
 import { exerciseCatalog } from '../stats/aggregate';
 import { store } from '../store';
@@ -68,7 +68,7 @@ export function WorkoutEditor({ id }: { id: string }) {
           <SuggestInput
             value={workout.title}
             label="Название тренировки"
-            placeholder={`${TYPE_META[workout.type].label}, или например «Грудь + спина»`}
+            placeholder="Например: «День ног»"
             suggestions={titles}
             onChange={(title) => store.updateWorkout(id, { title })}
           />
@@ -85,23 +85,6 @@ export function WorkoutEditor({ id }: { id: string }) {
                 if (isValidIso(v)) store.updateWorkout(id, { date: v });
               }}
             />
-          </label>
-          <label class="field">
-            <span class="label">Тип</span>
-            <select
-              class="input"
-              value={workout.type}
-              onChange={(e) => {
-                const v = e.currentTarget.value;
-                if (isWorkoutType(v)) store.updateWorkout(id, { type: v });
-              }}
-            >
-              {WORKOUT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {TYPE_META[t].icon} {TYPE_META[t].label}
-                </option>
-              ))}
-            </select>
           </label>
           <label class="field">
             <span class="label">Длительность, мин</span>

@@ -105,10 +105,15 @@ export function CalendarScreen() {
                   aria-pressed={iso === day}
                   onClick={() => pick(iso)}
                 >
-                  {parseIso(iso).getDate()}
                   {list.length > 0 && (
                     <span class="fire" aria-hidden="true">
-                      🔥{list.length > 1 && <small>{list.length}</small>}
+                      🔥
+                    </span>
+                  )}
+                  <span class="num">{parseIso(iso).getDate()}</span>
+                  {list.length > 1 && (
+                    <span class="count" aria-hidden="true">
+                      {list.length}
                     </span>
                   )}
                 </button>

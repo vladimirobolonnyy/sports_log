@@ -597,21 +597,39 @@ input[type='date'].input::-webkit-date-and-time-value {
   outline-offset: 3px;
 }
 
+/* The flame sits behind the number; a halo in the surface colour keeps the number readable over it. */
 .day .fire {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  display: flex;
-  align-items: flex-end;
-  font-size: 15px;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
   line-height: 1;
   pointer-events: none;
 }
 
-.day .fire small {
+.day .num {
+  position: relative;
+}
+
+.day.has .num {
+  text-shadow: 0 0 2px var(--surface), 0 0 3px var(--surface), 0 0 5px var(--surface);
+}
+
+.day .count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 11px;
   font-weight: 800;
-  color: var(--accent);
 }
 
 .wk {
